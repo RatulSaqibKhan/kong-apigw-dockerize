@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  kong-dbless:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kong-gateway:3.5.0.1
+    container_name: kong-dbless
+    networks:
+      - kong-net
+    environment:
+      KONG_DATABASE: off
+      KONG_SSL: on
+      KONG_SSL_CERT: /kong/declarative/ssl/ssl-cert-snakeoil.pem
+      KONG_SSL_CERT_KEY: /kong/declarative/ssl/ssl-cert-snakeoil.key
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+
+      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+      KONG_ADMIN_SSL_CERT: /kong/declarative/ssl/ssl-cert-snakeoil.pem
+      KONG_ADMIN_SSL_CERT_KEY: /kong/declarative/ssl/ssl-cert-snakeoil.key
+
+      KONG_ADMIN_GUI_SSL_CERT: /kong/declarative/ssl/ssl-cert-snakeoil.pem
+      KONG_ADMIN_GUI_SSL_CERT_KEY: /kong/declarative/ssl/ssl-cert-snakeoil.key
+      KONG_ADMIN_GUI_URL: https://localhost:8445
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "8444:8444"
+      - "8002:8002"
+      - "8445:8445"
+      - "8003:8003"
+      - "8004:8004"
+    volumes:
+      - ./kong.yml:/kong/declarative/kong.yml
+      - ./certs/ssl-cert-snakeoil.pem:/kong/declarative/ssl/ssl-cert-snakeoil.pem
+      - ./certs/ssl-cert-snakeoil.key:/kong/declarative/ssl/ssl-cert-snakeoil.key
+
+networks:
+  kong-net:
+    driver: bridge
